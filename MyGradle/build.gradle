@@ -38,7 +38,7 @@ dependencies {
 	}
 	compile ('org.springframework.boot:spring-boot-devtools')
 	compile poi
-	//compile ('net.sourceforge.jexcelapi:jxl:2.0.12')
+	compile ('net.sourceforge.jexcelapi:jxl:2.6.12')
 	compile commons_lang3
 	compile ('c3p0:c3p0:0.9.1.2')
 	runtime h2database
