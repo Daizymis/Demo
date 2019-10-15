@@ -12,7 +12,7 @@ export default {
   },
   data () {
     return {
-      nowDate: ''
+      
     }
   },
   methods: {
@@ -20,10 +20,6 @@ export default {
   },
 
   created () {
-
-    this.$nextTick(() => {
-      this.$refs.timeoutRef.timeoutChange(20);
-    })
   }
 
 
