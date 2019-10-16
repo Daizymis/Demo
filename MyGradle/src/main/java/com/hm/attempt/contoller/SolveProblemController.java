@@ -12,16 +12,13 @@
 */
 package com.hm.attempt.contoller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
-import com.hm.attempt.dao.UserDao;
+import com.hm.attempt.dao.UserMapper;
 import com.hm.attempt.entity.User;
 
 /**
@@ -29,30 +26,28 @@ import com.hm.attempt.entity.User;
  * @author min_huang
  *
  */
-@RestController
-@RequestMapping("/hm")
-@ResponseBody
+@Controller
 public class SolveProblemController {
 
 	@Autowired
-	private UserDao userDao;
+	UserMapper userMapper;
 
-	@RequestMapping(path = "/a", method = RequestMethod.GET)
-	public Map<String, String> getHelloWorld() {
-		Map<String, String> a = new HashMap<String, String>();
-		a.put("a", "b");
-		return a;
+	@RequestMapping(path = "/index")
+	public String getHelloWorld() {
+		return "index";
 	}
 
-	@RequestMapping(path = "/b", method = RequestMethod.GET)
+	@RequestMapping(path = "/b")
 	public String getB() {
 		return "a";
 	}
 
 	@RequestMapping(path = "/c", method = RequestMethod.GET)
+	@ResponseBody
 	public String setUser() {
-		userDao.save(new User("37957397539739", "lili", 18, "女"));
-		return userDao.findAll().toString();
+
+		userMapper.insertUser(new User("lili", 18, "女"));
+		return userMapper.findByName("aa").toString();
 
 	}
 }

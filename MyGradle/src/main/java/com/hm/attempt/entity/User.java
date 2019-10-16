@@ -14,11 +14,6 @@ package com.hm.attempt.entity;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -27,8 +22,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * @author min_huang
  *
  */
-@Entity
-@Table(name = "user")
 public class User implements Serializable {
 
 	/**
@@ -36,11 +29,8 @@ public class User implements Serializable {
 	 */
 	private static final long serialVersionUID = 8281265096968248101L;
 
-	@Column
-	@Id()
 	private String id;
 
-	@Column
 	private String name;
 
 	public User(String id, String name, int age, String gender) {
@@ -60,13 +50,10 @@ public class User implements Serializable {
 
 	public User() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
-	@Column
 	private int age;
 
-	@Column
 	private String gender;
 
 	public String getId() {

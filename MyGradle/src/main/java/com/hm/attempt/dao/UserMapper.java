@@ -12,7 +12,8 @@
 */
 package com.hm.attempt.dao;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.hm.attempt.entity.User;
 
@@ -21,6 +22,10 @@ import com.hm.attempt.entity.User;
  * @author min_huang
  *
  */
-public interface UserDao extends JpaRepository<User, String> {
 
+@Mapper
+public interface UserMapper {
+	User findByName(@Param("name") String name);
+
+	void insertUser(@Param("user") User user);
 }
