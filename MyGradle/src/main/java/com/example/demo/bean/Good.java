@@ -43,7 +43,7 @@ public class Good {
 
 	@Override
 	public String toString() {
-		return "name=" + name + ", num=" + num + ", unitprice=" + unitprice + ", totalprice=" + totalprice + " ";
+		return "名称=" + name + ", 数量=" + num + ", 单价=" + unitprice + ", 总价=" + totalprice + " ";
 	}
 
 }

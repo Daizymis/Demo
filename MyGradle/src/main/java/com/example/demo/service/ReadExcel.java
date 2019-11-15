@@ -35,7 +35,7 @@ public class ReadExcel {
 
 	private Date currentDate;
 
-	private JTextArea area;
+	private JTextArea area = new JTextArea();
 
 	public JTextArea getArea() {
 		return area;
@@ -55,13 +55,16 @@ public class ReadExcel {
 	}
 
 	public static void main(String[] args) {
-		// ReadExcel r = new ReadExcel();
-		// // 7月：20190912105435037 8月：20190912164112526
-		// File bankfile = new File("D:/A对账/bank/20190912105435037.xls");
-		// File detailfile = new File("D:/A对账/自营店铺明细报表7-23.XLS");
-		// r.compare(detailfile, bankfile);
-		//
-		// r.writeExcel(r.aList, r.bList);
+		ReadExcel r = new ReadExcel();
+		// 7月：20190912105435037 8月：20190912164112526
+		File bankfile = new File("D:/A对账/bank/20190912105435037.xls");
+		File detailfile = new File("D:/A对账/bank/自营店铺明细报表10-30.XLS");
+		r.compare(detailfile, bankfile);
+
+		if (!r.aList.isEmpty() || !r.bList.isEmpty()) {
+			r.writeExcel(r.aList, r.bList);
+		}
+
 	}
 
 	public void writeExcel(List<SystemRecord> l1, List<BankRecord> l2) {
@@ -82,34 +85,39 @@ public class ReadExcel {
 			int rownumber = 0;
 			if (!l1.isEmpty()) {
 				Label label = new Label(1, 0, "自营店铺明细表");
+				Label title0 = new Label(0, 1, "交易号");
 				Label title1 = new Label(1, 1, "交易日期");
 				Label title2 = new Label(2, 1, "店铺名称");
 				Label title3 = new Label(3, 1, "支付宝");
 				Label title7 = new Label(4, 1, "商品名称");
 				Label title4 = new Label(5, 1, "微信");
 
-				Label title5 = new Label(6, 1, "交易号");
 				Label title6 = new Label(7, 1, "支付金额");
 
 				sheet.addCell(label);
+				sheet.addCell(title0);
 				sheet.addCell(title1);
 				sheet.addCell(title2);
 				sheet.addCell(title3);
 				sheet.addCell(title4);
-				sheet.addCell(title5);
+
 				sheet.addCell(title6);
 				sheet.addCell(title7);
 				for (int i = 0; i < l1.size(); i++) {
-					Label label1 = new Label(0, rownumber + 2 + i, l1.get(i).getTransactionDate());
-					Label label6 = new Label(1, rownumber + 2 + i, l1.get(i).getTransactionId());
-					Label label2 = new Label(4, rownumber + 2 + i, l1.get(i).getAmount().toString());
-					Label label7 = new Label(3, rownumber + 2 + i, l1.get(i).getGoods().toString());
+					Label label0 = new Label(0, rownumber + 2 + i, l1.get(i).getTransactionId());
+					Label label1 = new Label(1, rownumber + 2 + i, l1.get(i).getTransactionDate());
+					Label label2 = new Label(7, rownumber + 2 + i, l1.get(i).getAmount().toString());
+					Label label7 = new Label(4, rownumber + 2 + i, l1.get(i).getGoods().toString());
 					Label label3 = new Label(2, rownumber + 2 + i, l1.get(i).getShopName());
+					Label label4 = new Label(5, rownumber + 2 + i, l1.get(i).getWechatAmount().toString());
+					Label label5 = new Label(3, rownumber + 2 + i, l1.get(i).getAliAmount().toString());
 					sheet.addCell(label7);
 					sheet.addCell(label1);
-					sheet.addCell(label6);
+					sheet.addCell(label0);
 					sheet.addCell(label2);
 					sheet.addCell(label3);
+					sheet.addCell(label4);
+					sheet.addCell(label5);
 				}
 
 			}
@@ -178,6 +186,9 @@ public class ReadExcel {
 
 			Sheet sheet = wk.getSheet(0);
 			List<String> innerList = new ArrayList<String>();
+			if (sheet.getCell(1, 0).getContents().equals("")) {
+				return;
+			}
 			for (int i = 0; i < sheet.getRows(); i++) {
 				for (int j = 0; j < sheet.getColumns(); j++) {
 					String contents = sheet.getCell(j, i).getContents();
@@ -189,26 +200,29 @@ public class ReadExcel {
 					i += 2;
 					flag = false;
 				}
-				if (innerList.contains("自营店铺明细报表")) {
+				if (innerList.contains("自营店铺明细表")) {
 					i += 2;
+					flag = true;
 				}
-				if (flag) {
-					SystemRecord record = new SystemRecord();
-					record.setTransactionId(sheet.getCell(1, i).getContents());
-					record.setTransactionDate(sheet.getCell(0, i).getContents());
-					record.setAmount(new BigDecimal(sheet.getCell(4, i).getContents()));
-					record.setShopName(sheet.getCell(2, i).getContents());
+				if (innerList.size() > 2) {
+					if (flag) {
+						SystemRecord record = new SystemRecord();
+						record.setTransactionId(innerList.get(0));
+						record.setTransactionDate(innerList.get(1));
+						record.setAmount(new BigDecimal(innerList.get(4)));
+						record.setShopName(innerList.get(2));
+						record.setGoods(string2Goods(innerList.get(3)));
+						aList.add(record);
+					} else {
+						BankRecord record = new BankRecord();
+						record.setTransactionDate(innerList.get(0));
+						record.setAmount(new BigDecimal(innerList.get(1)));
+						record.setSerialId(innerList.get(2));
+						record.setPayType(PayType.getEnum(innerList.get(3)));
+						bList.add(record);
+					}
+				}
 
-					record.setGoods(string2Goods(sheet.getCell(3, i).getContents()));
-					aList.add(record);
-				} else {
-					BankRecord record = new BankRecord();
-					record.setTransactionDate(sheet.getCell(0, i).getContents());
-					record.setAmount(new BigDecimal(sheet.getCell(1, i).getContents()));
-					record.setSerialId(sheet.getCell(2, i).getContents());
-					record.setPayType(PayType.getEnum(sheet.getCell(3, i).getContents()));
-					bList.add(record);
-				}
 				innerList.clear();
 			}
 			aList.sort(Comparator.comparing(SystemRecord::getTransactionDate));
@@ -271,7 +285,8 @@ public class ReadExcel {
 			bList.addAll(b);
 			System.out.println("爱信宝");
 			b.stream().forEach(i -> {
-				System.out.println(i.getTransactionDate() + "    " + i.getSerialId() + "   " + i.getAmount());
+				System.out.println(i.getTransactionDate() + "    " + i.getSerialId() + "   " + i.getAmount() + "   "
+						+ i.getPayType());
 				area.append(i.getTransactionDate() + "   " + i.getSerialId() + "   " + i.getAmount() + "\n");
 			});
 		}
@@ -287,9 +302,10 @@ public class ReadExcel {
 			for (int i = 12; i < sheet.getRows(); i++) {
 				for (int j = 0; j < sheet.getColumns(); j++) {
 					String contents = sheet.getCell(j, i).getContents();
-					if (!contents.isEmpty()) {
+					if (!contents.isEmpty() && !contents.contains("减价")) {
 						innerList.add(contents);
 					}
+
 				}
 				if (innerList.contains("小计：")) {
 					currentDate = currentDate == null ? string2Date(innerList.get(5)) : currentDate;
@@ -320,7 +336,7 @@ public class ReadExcel {
 					innerList.clear();
 				}
 			}
-			System.out.println(currentDate);
+			System.out.println("当前日期为" + currentDate);
 			System.out.println(results.size());
 			if (wk != null) {
 				wk.close();
@@ -342,8 +358,9 @@ public class ReadExcel {
 			Sheet sheet = wk.getSheet(0);
 			for (int i = 1; i < sheet.getRows() - 3; i++) {
 				BankRecord record = new BankRecord();
-				if (string2Date(sheet.getCell(0, i).getContents())
-						.before(string2Date(new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + " 23:59:59"))
+				if (sheet.getCell(0, i).getContents() != ""
+						&& string2Date(sheet.getCell(0, i).getContents()).before(
+								string2Date(new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + " 23:59:59"))
 						&& string2Date(sheet.getCell(0, i).getContents()).after(
 								string2Date(new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + " 00:00:00"))) {
 					record.setTransactionDate(sheet.getCell(0, i).getContents());
