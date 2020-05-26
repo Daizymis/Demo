@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^2.6.5",
+    "file-saver": "^2.0.2",
     "jquery": "^3.4.1",
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
@@ -27,8 +28,9 @@
     "babel-eslint": "^10.0.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10",
-    "vue-loader": "^14.2.4"
+    "ol": "^6.3.1",
+    "vue-loader": "^14.2.4",
+    "vue-template-compiler": "^2.6.10"
   },
   "eslintConfig": {
     "root": true,

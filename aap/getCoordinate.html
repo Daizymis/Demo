@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>导出坐标文件测试页</title>
+  <link rel="stylesheet" href="https://openlayers.org/en/v6.3.1/css/ol.css" type="text/css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ 
+</head>
+<style>
+  #map {
+    width: 580px;
+    height: 450px;
+  }
+
+  .btn-style {
+    width: 200px;
+    font-size: 32px;
+    height: 45px;
+  }
+
+  .input-style {
+    height: 45px;
+    font-size: 30px;
+    width: 400px
+  }
+</style>
+
+<body>
+  <div id="map"></div>
+  <input id="roomnumber" name="roomnumber" placeholder="请输入房间号" class="input-style">
+  <button id="confirmbtn" onclick="confirm()" class="btn-style">确认</button>
+  <button id="exportbtn" onclick="exportFile()" class="btn-style">导出</button>
+  <button id="exportbtn" onclick="renderMap()" class="btn-style">渲染</button>
+</body>
+<script
+src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>
+<script src="https://openlayers.org/en/v6.3.1/build/ol.js" type="text/javascript"></script>
+<script src="./FileSaver.js"></script>
+<script>
+  //最后要写进文件的数据
+  var list = {
+	type:"FeatureCollection",
+    features: []
+  }
+  var renderlist = {
+    type: 'FeatureCollection',
+    crs: {
+      type: 'name',
+      properties: {
+        name: 'EPSG:3857',
+      },
+    },
+    features: []
+  }
+  //单个元素的坐标集合
+  var coordinates = [[]];
+  var map;
+  window.onload = function () {
+
+    var extent = [0, 0, 50, 50];
+    var projection = new ol.proj.Projection({
+      code: "xkcd-image",
+      units: "pixels",
+      extent: extent
+    });
+
+    var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+    //生成唯一的uuid
+    Math.uuidFast = function () {
+      const chars = CHARS;
+      const uuid = new Array(36);
+      let rnd = 0;
+      let r;
+      for (let i = 0; i < 36; i++) {
+        if (i == 8 || i == 13 || i == 18 || i == 23) {
+          uuid[i] = '-';
+        } else if (i == 14) {
+          uuid[i] = '4';
+        } else {
+          if (rnd <= 0x02) rnd = 0x2000000 + (Math.random() * 0x1000000) | 0;
+          r = rnd & 0xf;
+          rnd >>= 4;
+          uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+        }
+      }
+      return uuid.join('');
+    };
+    //地图初始化
+    map = new ol.Map({
+      layers: [
+        new ol.layer.Image({
+          source: new ol.source.ImageStatic({
+            url: './public/roommap/A-10.png',//地图背景图片，也是想要获取坐标的图层
+            projection: projection,
+            imageExtent: extent,
+          }),
+        }),
+      ],
+      target: 'map',
+      view: new ol.View({
+        projection: projection,
+        center: ol.extent.getCenter(extent),
+        zoom: 1,
+        maxZoom: 3,
+        minZoom: 1,
+      }),
+    });
+    //添加点击事件，获取当前点击的位置的坐标
+    map.on('click', function (evt) {
+      console.log(evt.coordinate);
+      coordinates[0].push(evt.coordinate);
+    });
+  }
+  /**
+   * 保存一个元素
+   */
+  function confirm() {
+    //获取id
+    //document.getElementById('roomnumber').value为获取房间号
+    const id = Math.uuidFast();
+    var value = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: coordinates,
+      },
+      id: id,
+      properties: { modelId: document.getElementById('roomnumber').value, id: id, type: 'room' },
+
+    };
+    list.features.push(value);
+    renderlist.features.push(value)
+    //元素塞进集合后将坐标集合清空重置
+    coordinates = [[]];
+    console.log(list.features.length);
+  };
+  /**
+   * 导出文件,默认导出位置为C://用户/下载/
+   */
+  function exportFile() {
+    var content = JSON.stringify(this.list);
+    var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, 'A-10.roomlayer');//导出文件名
+  };
+  function renderMap() {
+    var getStyles = function (param) {
+      var style = new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: '#ad8677',
+          width: 0,
+        }),
+        fill: new ol.style.Fill({
+          color: '#ad8677',
+        }),
+        text: new ol.style.Text({ // 文本样式
+          className: 'map-font',
+          font: '14px Microsoft YaHei',
+          fill: new ol.style.Fill({
+            color: 'black',
+          }),
+        }),
+      });
+      return style;
+    };
+    var styleFunction = function (feature) { getStyles(feature.values_.modelId) };
+    console.log((new ol.format.GeoJSON()).readFeatures(renderlist))
+    var vectorSource = new ol.source.Vector({
+      features: (new ol.format.GeoJSON()).readFeatures(renderlist),
+    });
+    console.log(map.getLayers());
+	var layer=new ol.layer.Vector({
+      source: vectorSource,
+      style: styleFunction,
+      title: '',
+      type: 'room',
+    })
+	console.log(layer)
+    map.addLayer(layer);
+	console.log(map.getLayers())
+  }
+</script>
+
+</html>
