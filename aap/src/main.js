@@ -1,11 +1,16 @@
 import Vue from 'vue'
 import App from './App.vue'
-import router from './router'
+import pcRouter from './router'
+import mobileRouter from './route/mobile-route'
 import store from './store'
 import VueI18n from 'vue-i18n'
 import axios from 'axios'
 
 Vue.use(VueI18n)
+console.log(navigator.userAgent)
+const router =navigator.userAgent.match(
+  /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+) ? mobileRouter : pcRouter;
 
 export const i18n = new VueI18n({
   locale: 'zh',  // 语言标识
