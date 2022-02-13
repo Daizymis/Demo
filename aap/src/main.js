@@ -5,6 +5,7 @@ import mobileRouter from './route/mobile-route'
 import store from './store'
 import VueI18n from 'vue-i18n'
 import axios from 'axios'
+import './modules/vant'
 
 Vue.use(VueI18n)
 console.log(navigator.userAgent)
